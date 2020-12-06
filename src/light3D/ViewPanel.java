@@ -1,22 +1,27 @@
 package light3D;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-public class ViewPanel extends JPanel{
+/**
+ * 
+ * @author Timo Lehnertz
+ *
+ */
+
+public class ViewPanel extends JPanel implements ComponentListener{
 
 	private static final long serialVersionUID = 1L;
 
-	private Camera camera;
+	private Camera activeCamera;
 	private World world;
-	private Color background = Color.DARK_GRAY;
+	private BasicRenderer render;
 	
 	/**
 	 *  Repaint with 60 FPS
@@ -29,17 +34,11 @@ public class ViewPanel extends JPanel{
 	 */
 	public ViewPanel(Camera camera, World world) {
 		super();
-		setCamera(camera);
 		this.world = world;
-		this.t.start();
-	}
-	
-	private int getMaxWidth() {
-		return Math.max(getWidth(), getHeight());
-	}
-	
-	private int getMinWidth() {
-		return Math.min(getWidth(), getHeight());
+		render = new BasicRenderer(camera);
+		t.start();
+		setActiveCamera(camera);
+		addComponentListener(this);
 	}
 	
 	@Override
@@ -49,39 +48,51 @@ public class ViewPanel extends JPanel{
 		/**
 		 * background
 		 */
-		g.setColor(background);
+		g.setColor(Cons.COLOR_VIEW_PANEL_BG);
 		g.fillRect(0, 0, getWidth(), getHeight());
-		camera.handleMovement(getWidth(), getHeight());
-		
+		activeCamera.handleMovement();
 		/**
 		 * Rendering
 		 */
-		AffineTransform tbackup = g.getTransform();
-		for (MyObject object : world.getObjects()) {
-			Point2D.Double screenPos = camera.getScreenPos(object.getPos(), getMinWidth());
-			if(screenPos != null) {
-				g.setColor(Color.gray);
-				g.fillOval((int) screenPos.x, (int) screenPos.y, 5, 5);
-//				g.getTransform().translate(screenPos.x, screenPos.y);
-//				object.paint(g);
-//				g.setTransform(tbackup);
-			}
-		}
+		render.render(g, world);
 	}
 
-	protected Camera getCamera() {
-		return camera;
+	protected Camera getActiveCamera() {
+		return activeCamera;
 	}
 
-	protected void setCamera(Camera camera) {
-		if(this.camera != null) {
-			removeKeyListener(this.camera);
-			removeMouseListener(this.camera);
-			removeMouseListener(this.camera);
+	protected void setActiveCamera(Camera camera) {
+		if(!world.getObjects().contains(camera)) {
+			world.addObject(camera);
 		}
-		this.camera = camera;
+		if(this.activeCamera != null) {
+			removeKeyListener(this.activeCamera);
+			removeMouseListener(this.activeCamera);
+			removeMouseListener(this.activeCamera);
+		}
 		addKeyListener(camera);
 		addMouseListener(camera);
 		addMouseMotionListener(camera);
+		this.activeCamera = camera;
+	}
+
+	@Override
+	public void componentResized(ComponentEvent e) {
+		activeCamera.setRenderWidth(getWidth());
+		activeCamera.setRenderHeight(getHeight());
+	}
+
+	@Override
+	public void componentMoved(ComponentEvent e) {
+	}
+
+	@Override
+	public void componentShown(ComponentEvent e) {
+		activeCamera.setRenderWidth(getWidth());
+		activeCamera.setRenderHeight(getHeight());
+	}
+
+	@Override
+	public void componentHidden(ComponentEvent e) {
 	}
 }

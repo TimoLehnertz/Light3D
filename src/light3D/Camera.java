@@ -16,12 +16,14 @@ import java.awt.geom.Point2D;
 
 import javax.swing.SwingUtilities;
 
-public class Camera implements KeyListener, MouseListener, MouseMotionListener{
+/**
+ * 
+ * @author Timo Lehnertz
+ *
+ */
 
-	Vector3D pos = new Vector3D();
-	private double zRot = 0;
-	private double xRot = 0;
-	
+public class Camera extends MyObject implements KeyListener, MouseListener, MouseMotionListener{
+
 	/**
 	 * Mouse stuff
 	 */
@@ -30,6 +32,10 @@ public class Camera implements KeyListener, MouseListener, MouseMotionListener{
 	private double stearEnterZRot;
 	private double stearEnterXRot;
 	private Point mouse;
+	
+	private int renderWidth;
+	private int renderHeight;
+	
 	/**
 	 * Field of view in degrees
 	 * not implemented yet
@@ -62,16 +68,17 @@ public class Camera implements KeyListener, MouseListener, MouseMotionListener{
 	 */
 	private static final double MOUSE_SENSITIVITY = 0.5;
 	
-	private double speed = 0.2;
+	private double speed = 0.09;
 	
 	private Vector3D velocity = new Vector3D();
 	private double velocityRotZ = 0;
-	private double velocityRotX = 0;
-	private int width;
-	private int height;
 	
 	public Camera() {
 		super();
+	}
+	
+	private int getMinDimension() {
+		return Math.min(renderWidth, renderHeight);
 	}
 	
 	/**
@@ -81,8 +88,7 @@ public class Camera implements KeyListener, MouseListener, MouseMotionListener{
 	 * @param height
 	 * @return
 	 */
-	public Point2D.Double getScreenPos(Vector3D v, int minWidth) {
-		Vector3D local = toSpace(v);
+	public Point2D.Double getScreenPos(Vector3D local) {
 		if(local.y < 0) {//behind camera
 			return null;
 		}
@@ -93,28 +99,19 @@ public class Camera implements KeyListener, MouseListener, MouseMotionListener{
 		double x = local.x / local.y;
 		double y = -local.z / local.y;//minus as screen is inverted
 		
-		x = (x * minWidth / 2) + (minWidth / 2);
-		y = (y * minWidth / 2) + (minWidth / 2);
+//		if(x < -0.5 || x > 0.5 || y < -0.5 || y > 0.5) {
+//			return null; // out of fiew
+//		}
+		
+		int min = getMinDimension();
+		
+		x = (x * min / 2) + (min / 2);
+		y = (y * min / 2) + (min / 2);
 		
 		return new Point2D.Double(x, y);
 	}
 	
-	/**
-	 * Turn a vector into this camera space
-	 * @param b
-	 * @return
-	 */
-	public Vector3D toSpace(Vector3D b) {
-		Vector3D a = b.clone();
-		a.subtract(pos);
-		a.rotateZ(-Math.toRadians(zRot));
-		a.rotateX(-Math.toRadians(xRot));
-		return a;
-	}
-	
-	public void handleMovement(int width, int height) {
-		this.width = width;
-		this.height = height;
+	public void handleMovement() {
 		/**
 		 * incrementing
 		 */
@@ -146,8 +143,7 @@ public class Camera implements KeyListener, MouseListener, MouseMotionListener{
 		/**
 		 * decrementing
 		 */
-		velocity.divide(1.3);
-		if(velocity.getLength() < 0.1) {
+		if(velocity.getLength() < 0.001) {
 			velocity.setVector(new Vector3D());
 		} else {
 			/**
@@ -155,7 +151,7 @@ public class Camera implements KeyListener, MouseListener, MouseMotionListener{
 			 */
 			pos.add(velocity);
 		}
-		
+		velocity.divide(1.3);
 		velocityRotZ /= 1.3;
 		zRot += velocityRotZ;
 		/**
@@ -319,28 +315,26 @@ public class Camera implements KeyListener, MouseListener, MouseMotionListener{
 	@Override
 	public void mouseExited(MouseEvent e) {
 		if(middlemouseDown) {
-			if(mouse.x > width * 0.9) {
-				stearEnterZRot = zRot;
-				stearEnterPoint.x = 0;
-				moveMouse(new Point(0, mouse.y));
-				
-			} else if(mouse.x < width / 10) {
-				stearEnterZRot = zRot;
-				stearEnterPoint.x = (int) width;
-				moveMouse(new Point(width, mouse.y));
-				
-			} else if(mouse.y > height * 0.9) {
-				System.out.println("top");
-				stearEnterXRot = xRot;
-				stearEnterPoint.y = 0;
-				moveMouse(new Point(mouse.x, 0));
-				
-			} else if(mouse.y < height / 10) {
-				System.out.println("bottom");
-				stearEnterXRot = xRot;
-				stearEnterPoint.y = (int) height;
-				moveMouse(new Point(mouse.x, height));
-			}
+//			if(mouse.x > width * 0.9) {
+//				stearEnterZRot = zRot;
+//				stearEnterPoint.x = 0;
+////				moveMouse(new Point(0, mouse.y));
+//				
+//			} else if(mouse.x < width / 10) {
+//				stearEnterZRot = zRot;
+//				stearEnterPoint.x = (int) width;
+////				moveMouse(new Point(width, mouse.y));
+//				
+//			} else if(mouse.y > height * 0.9) {
+//				stearEnterXRot = xRot;
+//				stearEnterPoint.y = 0;
+////				moveMouse(new Point(mouse.x, 0));
+//				
+//			} else if(mouse.y < height / 10) {
+//				stearEnterXRot = xRot;
+//				stearEnterPoint.y = (int) height;
+////				moveMouse(new Point(mouse.x, height));
+//			}
 		} else if(SwingUtilities.isMiddleMouseButton(e)) {
 			middlemouseDown = false;
 		}
@@ -354,5 +348,28 @@ public class Camera implements KeyListener, MouseListener, MouseMotionListener{
 	@Override
 	public void mouseMoved(MouseEvent e) {
 		this.mouse = e.getPoint();
+	}
+
+	protected int getRenderWidth() {
+		return renderWidth;
+	}
+
+	protected void setRenderWidth(int renderWidth) {
+		this.renderWidth = renderWidth;
+	}
+
+	protected int getRenderHeight() {
+		return renderHeight;
+	}
+
+	protected void setRenderHeight(int renderHeight) {
+		this.renderHeight = renderHeight;
+	}
+
+	/**
+	 * Do nothing
+	 */
+	@Override
+	public void render(BasicRenderer r) {
 	}
 }

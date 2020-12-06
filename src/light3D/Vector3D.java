@@ -1,13 +1,28 @@
 package light3D;
 
+/**
+ * 
+ * @author Timo Lehnertz
+ *
+ */
+
 public class Vector3D {
 
-	private static final double BEAUTIFY_MARGIN = 0.000001;
+	private static final double BEAUTIFY_MARGIN = 0.00000001;
+	public static final Vector3D SCALE_DEFAULT = new Vector3D(1,1,1);
 	
 	public double x, y, z;
 
 	public Vector3D() {
 		this(0,0,0);
+	}
+	
+	public Vector3D(double scale) {
+		this(scale, scale, scale);
+	}
+	
+	public Vector3D(Vector3D v) {
+		this(v.x,v.y,v.z);
 	}
 	
 	public Vector3D(double x, double y, double z) {
@@ -23,6 +38,18 @@ public class Vector3D {
 		this.y = b.y;
 		this.z = b.z;
 		return beautify();
+	}
+	
+	public static Vector3D getScale(double scale) {
+		return new Vector3D(scale);
+	}
+	
+	public double distanceFrom(Transform t) {
+		return VMath.getDistance(this, t.pos);
+	}
+	
+	public double distanceFrom(Vector3D v) {
+		return VMath.getDistance(this, v);
 	}
 	
 	public Vector3D add(Vector3D b) {
@@ -56,6 +83,14 @@ public class Vector3D {
 	public double getLength() {
 		return VMath.getLength(this);
 	}
+	
+	public Vector3D getInverse() {
+		return VMath.getInverse(this);
+	}
+	
+	public Vector3D invert() {
+		 return setVector(VMath.getInverse(this));
+	}
 
 	private Vector3D beautify() {
 		if(x < BEAUTIFY_MARGIN && x > -BEAUTIFY_MARGIN) {
@@ -76,7 +111,7 @@ public class Vector3D {
 	}
 	
 	@Override
-	protected Vector3D clone() {
+	public Vector3D clone() {
 		return new Vector3D(x,y,z);
 	}
 }

@@ -2,6 +2,12 @@ package light3D;
 
 import javax.swing.JFrame;
 
+/**
+ * 
+ * @author Timo Lehnertz
+ *
+ */
+
 public class Frame extends JFrame{
 
 	private static final long serialVersionUID = 1L;

@@ -1,5 +1,11 @@
 package light3D;
 
+/**
+ * 
+ * @author Timo Lehnertz
+ *
+ */
+
 public class VMath {
 
 	public static Vector3D add(Vector3D a, Vector3D b) {
@@ -68,5 +74,21 @@ public class VMath {
 		double y = (a.y * Math.cos(rot)) - (a.z * Math.sin(rot));
 		double z = (a.y * Math.sin(rot)) + (a.z * Math.cos(rot));
 		return new Vector3D(a.x, y, z);
+	}
+
+	public static Vector3D getCenter(Vector3D a, Vector3D b) {
+		return divide(add(a, b), 2);
+	}
+	
+	public static Vector3D getCenter(Vector3D ... vectors) {
+		Vector3D center = vectors[0];
+		for (Vector3D vector3d : vectors) {
+			center = getCenter(center, vector3d);
+		}
+		return center;
+	}
+	
+	public static Vector3D getInverse(Vector3D a) {
+		return new Vector3D(1 / a.x, 1 / a.y, 1 / a.z);
 	}
 }

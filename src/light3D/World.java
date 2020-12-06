@@ -2,6 +2,12 @@ package light3D;
 
 import java.util.List;
 
+/**
+ * 
+ * @author Timo Lehnertz
+ *
+ */ 
+
 public class World {
 
 	private List<MyObject> objects;
