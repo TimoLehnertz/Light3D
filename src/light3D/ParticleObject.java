@@ -10,6 +10,29 @@ import java.awt.Color;
 
 public class ParticleObject extends MyObject {
 
+	/**
+	 * Use physics or disable
+	 */
+	boolean usePhisic;
+	
+	/**
+	 * Lifetime in seconds
+	 */
+	double lifetime;
+	
+	/**
+	 * Random lifetime
+	 * 	0 -> exists for exacly its lifetime
+	 * 	1 -> random time between lifetime and 0
+	 */
+	double randomLifeTime;
+	
+	/**
+	 * Amount to be emitted per second
+	 */
+	double amount;
+	
+	
 	public ParticleObject(double x, double y, double z) {
 		super(x, y, z);
 	}
